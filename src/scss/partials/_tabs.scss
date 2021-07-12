@@ -1,0 +1,45 @@
+@import "variables";
+
+.nav-tabs .nav-link,
+.nav-pills .nav-link{
+    border: none;
+    border-bottom: 1px solid #c2bdbd;
+    width: 270px;
+    border-radius: 0;
+    font: normal 18px Roboto;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+
+    label {
+        cursor: inherit;
+    }
+}
+.nav-tabs,.nav-pills{
+    border: none;
+    border-radius: 0;
+    justify-content: center;
+    margin-top: 20px;
+}
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active,
+.nav-pills .nav-item.show .nav-link,.nav-pills .nav-link.active{
+    border: none;
+    border-bottom: 3px solid #000000;
+    margin-bottom: -1px;
+    color: #000000;
+    text-align: center;
+    background: none;
+}
+.nav-tabs .nav-link:hover,.nav-pills .nav-link:hover{
+    border: none;
+    border-bottom: 3px solid #c2bdbd;
+    margin-bottom: -1px;
+}
+.nav-tabs .nav-link:focus,
+.nav-pills .nav-link:focus{
+    border-bottom: 3px solid #000000;
+}
+
+.vehicle_tab{
+    cursor: pointer;
+}
