@@ -430,6 +430,7 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
     const [filtersOpened] = useState(false)
     const { profile, isSelf } = state
     const { activeTab = 0 } = getParams()
+    console.log(profile)
 
     const onTabChange = (tab) => {
         const href = router.pathname.replace('[username]', router.query.username)
@@ -519,7 +520,7 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
                                 <Row className="my-2 d-flex justify-content-center">
                                     {profile.getFavorites.length ? profile.getFavorites.map((announceRaw, index) => (
                                         <Col key={index} sm={12} md={12} lg={6} xl={6} className="my-2">
-                                            <AnnounceCard announceRaw={announceRaw} />
+                                            <AnnounceCard announceRaw={announceRaw.getRaw} />
                                         </Col>
                                     )) : (
                                         <div className="d-flex flex-column align-items-center smy-2">

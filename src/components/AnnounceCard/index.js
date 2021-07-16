@@ -44,6 +44,7 @@ const Index = ({ announceRaw, featuredImgHeight }) => {
   const router = useRouter();
   const { t, lang } = useTranslation();
   const announce = new AnnounceModel(announceRaw);
+  console.log(announce);
   const [refWidth, { width }] = useDimensions();
   const { dispatchModalError } = useContext(MessageContext);
   const { dispatchModalState } = useContext(ModalContext);
@@ -91,6 +92,10 @@ const Index = ({ announceRaw, featuredImgHeight }) => {
     router.push(announce.getAnnounceLink);
   };
 
+  console.log("getAvatar: ", announce.getAuthor.getAvatar);
+  console.log("getAvatarUrl: ", announce.getAuthor.getAvatarUrl);
+  console.log("getAvatarUrl: ", likesCounter);
+  
   return (
     <Root>
       <CardContent>
