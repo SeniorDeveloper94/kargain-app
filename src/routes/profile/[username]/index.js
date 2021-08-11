@@ -9,6 +9,10 @@ import ChatIcon from '@material-ui/icons/Chat'
 import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
 import Alert from '@material-ui/lab/Alert'
+import Dialog from '@material-ui/core/Dialog'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogActions from '@material-ui/core/DialogActions'
+import DeleteIcon from '@material-ui/icons/Delete'
 import { useAuth } from '../../../context/AuthProvider'
 import { MessageContext } from '../../../context/MessageContext'
 import { ModalContext } from '../../../context/ModalContext'
@@ -74,6 +78,10 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '12px',
         marginRight: '15px'
     },
+    button: {
+        margin: '1rem'
+    },
+    
 }))
 
 const Profile = () => {
@@ -105,7 +113,15 @@ const Profile = () => {
     const profile = state.profile
 
     const handleFollowProfile = async () => {
-        if (!isAuthenticated) return setForceLoginModal(true)
+        if (!isAuthenticated) {
+            console.log(router.asPath);
+            router.push({
+                pathname: '/auth/login',
+                query: { redirect: router.asPath },
+            });
+            return
+            // return setForceLoginModal(true)
+        }
         try {
             if (alreadyFollowProfile) {
                 await UsersService.unFollowUser(profile.getID)
@@ -261,10 +277,21 @@ const Profile = () => {
                                     variant="contained"
                                     color="primary"
                                     startIcon={<ChatIcon />}
-                                    onClick={() => dispatchModalState({
-                                        openModalMessaging: true,
-                                        modalMessagingProfile: profile
-                                    })}>
+                                    onClick={ () => {
+                                            if(!isAuthenticated){
+                                                console.log(router.asPath);
+                                                router.push({
+                                                pathname: '/auth/login',
+                                                query: { redirect: router.asPath },
+                                                });
+                                            } else {
+                                                dispatchModalState({
+                                                    openModalMessaging: true,
+                                                    modalMessagingProfile: profile
+                                                })
+                                            }
+                                        }
+                                    }>
                                     {t('vehicles:contact')}
                                 </Button>
                             </div>
@@ -401,7 +428,8 @@ const Profile = () => {
             <TabsContainer {...{
                 state,
                 filterState,
-                updateFilters
+                updateFilters,
+                fetchAnnounces
             }} />
         </Container>
     )
@@ -422,15 +450,37 @@ const getParams = () => {
     }, {})
 }
 
-const TabsContainer = ({ state, filterState, updateFilters }) => {
+const TabsContainer = ({ state, filterState, updateFilters, fetchAnnounces }) => {
     const router = useRouter()
     const classes = useStyles()
     const { t } = useTranslation()
     const { isAuthenticated } = useAuth()
+    const { dispatchModal, dispatchModalError } = useContext(MessageContext)
+    const { dispatchModalState } = useContext(ModalContext)
     const [filtersOpened] = useState(false)
     const { profile, isSelf } = state
     const { activeTab = 0 } = getParams()
-    console.log(profile)
+
+    const[selectedSlug, setSelectedSlug] = useState("")
+    const [openDialogRemove, setOpenDialogRemove] = useState(false)
+
+    const handleOpenDialogRemove = () => {
+	    setOpenDialogRemove(true)
+    }
+
+    const handleCloseDialogRemove = () => {
+	    setOpenDialogRemove(false)
+    }
+
+    const handleRemove = () => {
+		AnnounceService.removeAnnounce(selectedSlug)
+			.then(() => {
+				dispatchModal({ msg: 'Announce successfully removed' })
+                window.location.reload() 
+			}).catch(err => {
+				dispatchModalError({ err })
+	    })
+    }
 
     const onTabChange = (tab) => {
         const href = router.pathname.replace('[username]', router.query.username)
@@ -460,7 +510,7 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
                                             xl={6}
                                             className="my-2"
                                         >
-                                            <AnnounceCard announceRaw={announce.getRaw} />
+                                            <AnnounceCard announceRaw={announce.getRaw} onSelectSlug={setSelectedSlug} onhandleOpenDialogRemove={handleOpenDialogRemove} />
                                         </Col>
                                     )) : (
                                         <div className="d-flex flex-column align-items-center smy-2">
@@ -497,18 +547,6 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
                                     )) : (
                                         <div className="d-flex flex-column align-items-center smy-2">
                                             <p>{t('vehicles:no-hidden-announces')}</p>
-
-                                            <CTALink
-                                                title={t('vehicles:create-my-first-ad')}
-                                                href="/deposer-une-annonce"
-                                                className="cta_nav_link my-2"
-                                            />
-
-                                            <CTALink
-                                                title={t('vehicles:explore-ads')}
-                                                href={isAuthenticated ? '/feed' : '/'}
-                                                className="cta_nav_link my-2"
-                                            />
                                         </div>
                                     )}
                                 </Row>
@@ -525,18 +563,6 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
                                     )) : (
                                         <div className="d-flex flex-column align-items-center smy-2">
                                             <p>{(t('vehicles:no-favorite-announces'))}</p>
-
-                                            <CTALink
-                                                title={t('vehicles:create-my-first-ad')}
-                                                href="/deposer-une-annonce"
-                                                className="cta_nav_link my-2"
-                                            />
-
-                                            <CTALink
-                                                title={t('vehicles:explore-ads')}
-                                                href={isAuthenticated ? '/feed' : '/'}
-                                                className="cta_nav_link my-2"
-                                            />
                                         </div>
                                     )}
                                 </Row>
@@ -545,6 +571,28 @@ const TabsContainer = ({ state, filterState, updateFilters }) => {
                     </Tabs>
                 </Col>
             </Row>
+            
+            <Dialog
+                open={openDialogRemove}
+                onClose={handleCloseDialogRemove}
+                >
+                <DialogTitle id="alert-dialog-title" disableTypography>
+                    {t('vehicles:confirm-suppression')}
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleCloseDialogRemove} color="primary" autoFocus>
+                    {t('vehicles:cancel')}
+                    </Button>
+                    <Button
+                    variant="contained"
+                    color="secondary"
+                    className={classes.button}
+                    startIcon={<DeleteIcon/>}
+                    onClick={handleRemove} >
+                    {t('vehicles:remove-announce')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     )
 }

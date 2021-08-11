@@ -48,13 +48,21 @@ const Messages = () => {
     }
   };
 
+  const onEnterPress = (e) => {
+    e.persist()
+    if(e.keyCode == 13 && e.shiftKey == false) {
+      e.preventDefault();
+      onSubmitMessage({ message: e.target.value})
+    }
+  }
+
   const onSubmitMessage = async (form) => {
-    console.log(form);
     const { message } = form;
     try {
       // const conversation = await ConversationsService.postConversationMessage(message, selectedRecipient.getID)
       // setSelectedConversation(conversation)
-      socket.emit('PRIVATE_MESSAGE', { message, to: selectedRecipient.getID });
+      console.log(selectedConversation.announce.id);
+      socket.emit('PRIVATE_MESSAGE', { message, to: selectedRecipient.getID, announceId: selectedConversation.announce.id });
 
       selectedConversation.messages.push({
         from: authenticatedUser.getID,
@@ -100,11 +108,25 @@ const Messages = () => {
 
   useEffect(() => {
     if (privateMessage && selectedRecipient) {
-      const messages = selectedConversation ? selectedConversation.messages : [];
-      messages.push(privateMessage);
-      setSelectedConversation({
-        ...selectedConversation,
-        messages,
+      const item = conversations.some((conversation, index) => {
+        if(conversation.announce.id === selectedConversation.announce.id){
+          console.log(index, conversation.announce.id === selectedConversation.announce.id)
+          const messages = selectedConversation ? selectedConversation.messages : [];
+          messages.push(privateMessage);
+          setSelectedConversation({
+            ...selectedConversation,
+            messages,
+          });
+          return conversation;
+        } else if(conversation.announce.id === privateMessage.announceId){
+          console.log(index, conversation.announce.id === privateMessage.announceId)
+          conversations[index].messages.push(privateMessage)
+          setSelectedConversation({
+            ...conversations[index]
+          });
+          return conversation;
+        }
+        console.log("breacked")
       });
     }
   }, [privateMessage]);
@@ -145,7 +167,7 @@ const Messages = () => {
                           />
                         </div>
                         <div className={classes.itemDetails}>
-                          <p className="mt-0">{recipient.getFullName}</p>
+                          <p className="mt-0">{recipient.getFullName} | <span className="mx-2">{conversation.announce.title}</span></p>
                           <p className={classes.itemDetailsPreview}>
                             {format(parseISO(conversation.createdAt), 'MM/dd/yyyy')}
                           </p>
@@ -169,7 +191,7 @@ const Messages = () => {
           >
             <div className={classes.conversationHeader}>
               <div className={classes.headerUsername}>
-                <div style={{ maxWidth: '70%' }}>
+                <div style={{ maxWidth: '70%', display: "-webkit-inline-box" }}>
                   <Link href={selectedRecipient.getProfileLink} prefetch={false}>
                     <a>
                       <Avatar
@@ -180,6 +202,16 @@ const Messages = () => {
                         style={{width: 52, height: 52}}
                       />
                       <span className="mx-2">{selectedRecipient.getFullName}</span>
+                    </a>
+                  </Link>
+                  <Link href={`/announces/${selectedConversation.announce.slug}`} prefetch={false}>
+                    <a>
+                        <img
+                          src={selectedConversation.announce.images[0].location}
+                          alt={selectedConversation.announce.title}
+                          style={{width: 52, height: 52, borderRadius: "10%"}}
+                        />
+                      <span className="mx-2">{selectedConversation.announce.title}</span>
                     </a>
                   </Link>
                 </div>
@@ -239,6 +271,7 @@ const Messages = () => {
                   placeholder={t('vehicles:write_your_message')}
                   maxLength={30000}
                   rows={2}
+                  onKeyDown={onEnterPress} 
                 />
                 {errors && <ValidationError errors={errors} name={name} />}
                 <button className={classes.conversationInputButton} type="submit">

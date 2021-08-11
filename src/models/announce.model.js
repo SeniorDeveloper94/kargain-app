@@ -2,6 +2,10 @@ import UserModel from './user.model'
 import parseISO from 'date-fns/parseISO'
 import ImageModel from './image.model'
 import CommentModel from './comment.model'
+import ObjectID from 'bson-objectid'
+import Web3 from 'web3'
+
+const toBN = Web3.utils.toBN
 
 export default class AnnounceModel {
     
@@ -18,6 +22,10 @@ export default class AnnounceModel {
         return this.raw?.id
     }
 
+    get getTokenId () {
+        return toBN(ObjectID(this.raw?.id).toHexString())
+    }
+
     get getAuthor () {
         return new UserModel(this.raw?.user)
     }
@@ -31,7 +39,7 @@ export default class AnnounceModel {
     }
     
     get getAnnounceShareLink () {
-        return this.getSlug ? `https://kargain.com/announces/announces/${this.getSlug}` : null
+        return this.getSlug ? `https://kargain.com/announces/${this.getSlug}` : null
     }
 
     get getAnnounceEditLink () {
@@ -278,7 +286,9 @@ export default class AnnounceModel {
     get showCellPhone () {
         return this.raw?.showCellPhone
     }
-
+    get getPhone () {
+        return this.raw?.phone
+    }
     get getIsVisible () {
         return this.raw?.visible
     }

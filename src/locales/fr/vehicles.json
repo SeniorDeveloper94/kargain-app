@@ -7,11 +7,12 @@
   "tags": "Hashtags",
   "vat": "TVA déductible",
   "defective_vehicle": "Véhicule défectueux",
-
+  "makeOffer": "Faire une offre",
   "sort-by": "Trier par",
   "filter-by": "Filtrer par",
   "filtered-by": "Filtré par",
   "apply-filters": "Appliquer les filtres",
+  "clear-filters": "Effacer",
   "edit_filters": "Modifier les filtres",
   "reset-filters": "Reinitialiser les filtres",
   "{count}_results_search" : "{{count}} résultats",
@@ -216,5 +217,8 @@
   "informations_request" : "Demande d'informations",
   "partnership_request" : "Demande de partnenariat",
   "back_to_profile" : "Retour sur le profil",
-  "i_dont_know_other" : "Je ne sais pas/Autre"
+  "i_dont_know_other" : "Je ne sais pas/Autre",
+  "mint" : "MINT",
+  "announce_approve" : "Announce Approve as Free",
+  "announce_count" : "Announces Count"
 }

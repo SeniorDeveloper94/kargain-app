@@ -29,9 +29,10 @@ export default function ModalMessaging() {
     validateCriteriaMode: 'all',
   });
 
+  const announce = modalStateContext.modalMessaginAnnounce;
   const recipient = modalStateContext.modalMessagingProfile;
   const recipientID = recipient.getID;
-
+  const announceID = announce?.getID;
   const { socket, privateMessage, getOnlineStatusByUserId } = useSocket();
 
   const handleClose = () => {
@@ -42,18 +43,26 @@ export default function ModalMessaging() {
 
   const loadConversation = async () => {
     try {
-      let conversation = await ConversationsService.getConversationWithProfile(recipientID);
+      let conversation = announceID ? (await ConversationsService.getConversationWithProfileAnnounce(recipientID, announceID)) : (await ConversationsService.getConversationWithProfile(recipientID));
       setConversation(conversation);
     } catch (err) {
       dispatchModalError({ err });
     }
   };
 
+  const onEnterPress = (e) => {
+    e.persist()
+    if(e.keyCode == 13 && e.shiftKey == false) {
+      e.preventDefault();
+      onSubmitMessage({ message: e.target.value})
+    }
+  }
+
   const onSubmitMessage = async (form) => {
     const { message } = form;
     try {
-      socket.emit('PRIVATE_MESSAGE', { message, to: recipientID });
-      if (conversation) conversation.messages.push({ from: authenticatedUser.getID, content: message });
+      socket.emit('PRIVATE_MESSAGE', { message, to: recipientID, announceId:  conversation?.announce ? conversation.announce.id: announceID});
+      if (conversation) conversation.messages.push({ from: authenticatedUser.getID, announceId:  conversation.announce.id, content: message });
       else {
         let conversation = {};
         conversation.messages = [{ from: authenticatedUser.getID, content: message }];
@@ -79,7 +88,7 @@ export default function ModalMessaging() {
   }, [recipientID, isAuthenticated]);
 
   useEffect(() => {
-    if (privateMessage) {
+    if (privateMessage?.announceId === conversation?.announce?.id) {
       const messages = conversation ? conversation.messages : [];
       messages.push(privateMessage);
       setConversation({
@@ -108,7 +117,7 @@ export default function ModalMessaging() {
             <div className={classes.conversation}>
               <div className={classes.conversationHeader}>
                 <div className={classes.headerUsername}>
-                  <div style={{ maxWidth: '70%' }}>
+                  <div style={{ maxWidth: '70%', display: "-webkit-inline-box" }}>
                     <Link href={recipient.getProfileLink} prefetch={false}>
                       <a>
                         <Avatar
@@ -121,6 +130,25 @@ export default function ModalMessaging() {
                         <span className="mx-2">{recipient.getFullName}</span>
                       </a>
                     </Link>
+                    { announce?.getID ? (<Link href={announce?.getAnnounceLink} prefetch={false}>
+                      <a>
+                        <img
+                          src={announce?.getFeaturedImg?.getLocation}
+                          alt={announce?.getTitle}
+                          style={{width: 52, height: 52, borderRadius: "10%"}}
+                        />
+                        <span className="mx-2">{announce?.getAnnounceTitle}</span>
+                      </a>
+                    </Link>) : (<Link href={`/announces/${conversation?.announce?.slug}`} prefetch={false}>
+                      <a>
+                        <img
+                          src={conversation?.announce?.images[0]?.location}
+                          alt={conversation?.announce?.getTitle}
+                          style={{width: 52, height: 52, borderRadius: "10%"}}
+                        />
+                        <span className="mx-2">{conversation?.announce?.title}</span>
+                      </a>
+                    </Link>)}
                   </div>
                 </div>
               </div>
@@ -187,6 +215,7 @@ export default function ModalMessaging() {
                     placeholder={t('layout:write_your_message')}
                     maxLength={30000}
                     rows={2}
+                    onKeyDown={onEnterPress} 
                   />
                   {errors && <ValidationError errors={errors} name={name} />}
                   <button className={classes.conversationInputButton} type="submit">
