@@ -10,6 +10,7 @@ import { Collapse, Container,  Nav, Navbar, NavbarBrand, NavbarToggler, NavItem 
 import Button from '@material-ui/core/Button'
 import LanguageIcon from '@material-ui/icons/Language'
 import AddIcon from '@material-ui/icons/Add'
+import { Emoji } from 'react-apple-emojis'
 
 import useMediaQuery from '@material-ui/core/useMediaQuery'
 import ChatIcon from '@material-ui/icons/Chat'
@@ -115,7 +116,7 @@ const NavbarClient = () => {
                         href="https://kargain.world"
                         prefetch={false}>
                         <a target="_blank" variant="text" style={{color: "#2C6BFC"}}>
-                            <LanguageIcon style={{ width: 20, height: 20}} />
+                            <Emoji name="globe-with-meridians" width={16} />
                         </a>
                     </Link>
                 </Navbar>
@@ -132,7 +133,7 @@ const NewAdButtonCTA = ({ isDesktop, className }) => {
             icon={!isDesktop && AddIcon}
             href="/deposer-une-annonce"
             className={className}
-            style={{borderRadius: "17px", height: "33px" }}
+            style={{borderRadius: "20px", height: "33px" }}
             variant="contained"
             color="primary"
         />
@@ -140,7 +141,11 @@ const NewAdButtonCTA = ({ isDesktop, className }) => {
 }
 
 const NewAdButtonCTAStyled = styled(NewAdButtonCTA)`
-border-radius: 50px;
+border-radius: 20px;
+    &:hover{
+        color: "#fff";
+        background-color: "#fff";
+    }
 `
 
 const NavbarAction = ({ vertical }) => {
@@ -319,14 +324,14 @@ const VisitorNav = ({ vertical }) => {
         <Nav navbar className={clsx("my-2", vertical ? "flex-column" : "flex-row-nav")}>
             <NavItem className="p-2">
                 <Link href="/auth/login" prefetch={false}>
-                    <a className="nav-link py-0">
+                    <a className="nav-link py-0" style={{ color: "#666666" }}>
                         {t('layoutC:login')}
                     </a>
                 </Link>
             </NavItem>
             <NavItem className="p-2">
                 <Link href="/auth/register" prefetch={false}>
-                    <a className="nav-link py-0">
+                    <a className="nav-link py-0" style={{ color: "#666666" }}>
                         {t('layoutC:register')}
                     </a>
                 </Link>
