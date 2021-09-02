@@ -8,8 +8,6 @@ import { useRouter } from 'next/router'
 import { MessageContext } from '../../context/MessageContext'
 import AnnounceService from '../../services/AnnounceService'
 import { useAuth } from '../../context/AuthProvider'
-import TagsList from '../Tags/TagsList'
-import CTALink from '../CTALink'
 import { ModalContext } from '../../context/ModalContext'
 import AnnounceModel from '../../models/announce.model'
 import { getTimeAgo } from '../../libs/utils'
@@ -23,8 +21,8 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import GalleryViewer from '../Gallery/GalleryViewer'
 import { useSocket } from '../../context/SocketContext'
 import usePriceTracker from 'hooks/usePriceTracker'
+import { Row } from 'reactstrap'
 
-import { ButtonToggle, Row } from 'reactstrap'
 import { NewIcons } from '../../assets/icons'
 import clsx from 'clsx'
 import { Emoji } from 'react-apple-emojis'
@@ -46,9 +44,7 @@ const useStyles = makeStyles(() => ({
             objectFit: 'fill !important',
         }
     },
-
     a_coin:{
-       
         fontStyle: 'normal',
         fontWeight: '500',
         fontSize: '12.2272px',
@@ -68,7 +64,7 @@ const useStyles = makeStyles(() => ({
         fontFamily: 'Avenir Next',
         fontSize: '14px',
         fontWeight: '700',
-        padding: '.1rem 1rem',
+        padding: '6px 16px',
         color: '$color-black',
         boxShadow: '0 0 6px 0 #f0eeee',
         border: 'solid 2px transparent',
@@ -77,7 +73,19 @@ const useStyles = makeStyles(() => ({
         backgroundClip: 'content-box, border-box',
         boxShadow: '2px 1000px 1px #f0eeee inset',
         baclgroundColor: '#F0EEEE !important',
-        transform: 'translate(-50%, -50%)',
+        transform: 'translate(10%, -15%)',
+    },
+    avatar:{
+        '& svg':{
+            marginLeft:'1px !important',
+        }
+    },
+    row:{
+        display: '-webkit-flex',
+        display: '-moz-box',
+        display: 'flex, -webkitFlex-wrap: wrap',
+        flexWrap: 'wrap',
+        marginRight: '-15px'
     }
 }))
 
@@ -89,7 +97,6 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
     const [priceBNB, setPrice] = useState(0)
     const { t, lang } = useTranslation()
     const announce = new AnnounceModel(announceRaw)
-    const [refWidth, { width }] = useDimensions()
     const { dispatchModalError } = useContext(MessageContext)
     const { dispatchModalState } = useContext(ModalContext)
     const [likesCounter, setLikesCounter] = useState(announce.getCountLikes)
@@ -178,17 +185,12 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
     }
     
     return (
-        <Row>
-            <Root  style={{borderRadius:'25px', border: '2px solid #D9D9DB', boxSizing: 'border-box', width: '98%'}}>
+        <div className={clsx(classes.row)}>
+            <Root  style={{borderRadius:'25px', border: '2px solid #D9D9DB', boxSizing: 'border-box', height:'520px'}}>
             
                 <CardContent>
                     <Body>
                         <Meta style={{marginTop: '7px', marginRight: '2px', marginBottom: '-15px'}}>
-                            {/* <CreationDate>
-                                <i.AccessTime />
-                                {getTimeAgo(announce.getCreationDate.raw, lang)}
-                            </CreationDate> */}
-
                             <NewIcons.share
                                 onClick={() =>
                                     dispatchModalState({
@@ -222,16 +224,14 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
                                     {announce.getCountImages}
                                 </ImageCounter>
                             )}
-                            <div style={{display: 'flex', justifyContent: 'flex-end', marginRight: '-50px'}}> 
+                            <div style={{display: 'flex', justifyContent: 'flex-end', marginTop:'-5%'}}> 
                                 <div className={'btn btn-primary', classes.filterbutton}>
                                     € {announce.getPrice}
                                 </div>
                             </div>
                         </ImageWrapper>
-                        
-                        
 
-                        <User style={{marginTop:'-5%'}}>
+                        <User>
                             <Avatar
                                 src={announce.getAuthor.getAvatar || announce.getAuthor.getAvatarUrl}
                                 size="medium"
@@ -239,11 +239,11 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
                                 style={{ width: 45, height: 45, marginRight: 10 }}
                             />
 
-                            <Info>
+                            <Info style={{width:'55%', marginTop:'-5px'}}>
                                 <AuthorName href={announce.getAuthor.getProfileLink} style={{fontsSize:'13.9739px !important', fontWeight:'normal', color:'black', marginLeft:'2px'}}>{announce.getAuthor.getFullName}</AuthorName>
 
                                 {announce.getAdOrAuthorCustomAddress(['city', 'postCode', 'country']) && (
-                                    <Location href={announce.buildAddressGoogleMapLink()} target="_blank" rel="noreferrer" style={{fontSize:'13.9739px', fontWeight:'normal', color:'#999999', marginLeft: '2px'}}>
+                                    <Location href={announce.buildAddressGoogleMapLink()} target="_blank" rel="noreferrer" className={clsx(classes.avatar)} style={{fontSize:'13.9739px', fontWeight:'normal', color:'#999999', marginLeft: '2px'}}>
                                         {/* <i.RoomOutlined size={5.24} /> */}
                                         <NewIcons.card_location/>
                                         {announce.getAdOrAuthorCustomAddress(['city', 'country'])}
@@ -251,8 +251,8 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
                                 )}
                             </Info>
 
-                            <div style={{marginLeft: '100px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
-                                <SubHeader style={{marginTop:'21px !important'}}>
+                            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
+                                <SubHeader style={{marginTop:'20px !important'}}>
                                     {isOwn && (
                                         <Action onClick={toggleVisibility}>
                                             {announce.getIsVisible ? <i.VisibilityOutlined /> : <i.VisibilityOffOutlined />}
@@ -261,45 +261,19 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
 
                                     {!isAuthor && (
                                         <Action title={t('vehicles:i-like')} onClick={() => handleClickLikeButton()}>
-                                            {/* <i.BookmarkBorder
-                                                style={{
-                                                    color: liked ? '#DB00FF' : '#444444'
-                                                }}
-                                            /> */}
-                                            <NewIcons.card_heart />
-                                            <span>{likesCounter}</span>
+                                            <NewIcons.card_heart style={{marginRight:'7px'}}/>
+                                            <span style={{color:'#999999'}}>{likesCounter}</span>
                                         </Action>
                                     )}
 
                                     <Action
                                         title={t('vehicles:comment_plural')}
-                                        style={{ color: announce.getCountComments > 0 ? '#29BC98' : '#444444' }}
+                                        style={{ color: announce.getCountComments > 0 ? '#999999' : '#999999' }}
                                         onClick={() => handleImageClick()}
                                     >
-                                        {/* <i.ChatBubbleOutline style={{ width: 23, marginRight: 4 }} /> */}
-                                        <NewIcons.card_message />
+                                        <NewIcons.card_message style={{marginLeft:'10px', marginRight:'7px'}}/>
                                         <span>{announce.getCountComments}</span>
                                     </Action>
-
-                                    {/* <Action
-                                        onClick={() => {
-                                            if (!isAuthenticated) {
-                                                router.push({
-                                                    pathname: '/auth/login',
-                                                    query: { redirect: router.asPath },
-                                                });
-                                                return
-                                            }
-                                            dispatchModalState({
-                                                openModalMessaging: true,
-                                                modalMessagingProfile: announce.getAuthor,
-                                                modalMessaginAnnounce: announce
-                                            })
-                                            }
-                                        }
-                                    >
-                                        <i.MailOutline style={{ position: 'relative', top: -1 }} />
-                                    </Action> */}
 
                                     {tokenPrice && <Price>€ {(priceBNB * tokenPrice).toFixed(2)}</Price>}
                                 </SubHeader>
@@ -307,9 +281,11 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
                             </div>
                             
                         </User>
+
                         <div style={{marginLeft:'5px', marginTop:'15px'}}>
                             <a className={clsx(classes.a_coin)}>#1212</a>
                         </div>
+
                         <Link href={announce.getAnnounceLink}>
                             <a > 
                                 <h3 className={clsx(classes.a_info)}>
@@ -319,45 +295,18 @@ const Index = ({ announceRaw, featuredImgHeight, tokenPrice, onhandleOpenDialogR
                             </a>
                         </Link>
                         
-                        
-                        {/* {announce.getTags?.length > 0 && <TagsList tags={announce.getTags} />} */}
-                        
-                        {/* {announce.getCountComments > 0 && (
-                            <CommentListStyled
-                                // comments={announce.getComments.reverse().slice(0, 1)}
-                                // moreLink={announce.getCountComments > 1 ? <Link href={announce.getAnnounceLink}>more</Link> : null}
-                            />
-                        )} */}
                         <div style={{marginLeft:'5px ', marginBottom:'-15px '}}>
                             <h6 style={{fontsSize:'16px ', textAlign:'left'}}> 
-                                {/* {announce.getMileage} */}
                                 {strkm} Km 
-                                     
                             </h6>
+                            
                             <Emoji name="gear" width="18" style={{marginTop:'-55px', marginLeft:"90%"}} />
                         </div>
                     </Body>
  
                 </CardContent>
-
-                {/* <Footer> */}
-                    
-                    {/* {(isAuthor && typeof onhandleOpenDialogRemove === "function" && typeof onSelectSlug === "function")? (
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            className={classes.buttonRemove}
-                            startIcon={<DeleteIcon/>}
-                            onClick={e => {
-                                onSelectSlug(announce.getSlug)
-                                onhandleOpenDialogRemove()
-                            }}>
-                            {t('vehicles:remove-announce')}
-                        </Button>) : (<CTALink title={t('vehicles:see-announce')} href={announce.getAnnounceLink} />)}
-                    {isAuthor && <CTALink title={t('vehicles:edit-announce')} href={announce.getAnnounceEditLink} />} */}
-                {/* </Footer> */}
             </Root>
-        </Row>
+        </div>
     )
 }
 
